@@ -10,6 +10,9 @@ model = get_fasterrcnn(2)
 model.load_state_dict(torch.load(path))
 model.eval()
 
+device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+model.to(device)
+
 data = PennFudanPed('PennFudanPed', None)
 image, targets = data[0]
 

@@ -1,4 +1,4 @@
-from model import get_fasterrcnn
+from model import get_fasterrcnn, get_maskrcnn
 from data import PennFudanPed
 from tqdm import tqdm
 import datetime
@@ -12,14 +12,16 @@ from torch.utils.data import DataLoader
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # load model with frozen backbone
-model = get_fasterrcnn(2, weights='DEFAULT', freeze_backbone=True)
+model_type = "maskrcnn"
+model = get_maskrcnn(2, weights='DEFAULT', freeze_backbone=True)
 model.to(device)
 ## summary(model)
 
 # some parameters
-epochs = 10
+epochs = 50
 batch_size = 4
-transforms = transforms.Compose([transforms.ToTensor(), transforms.ConvertImageDtype(torch.float)])
+transforms = transforms.Compose([transforms.ToTensor(),
+                                 transforms.ConvertImageDtype(torch.float)])
 collate_fn = lambda batch: tuple(zip(*batch))
 
 
@@ -56,7 +58,22 @@ def test_inference():
 # optimizer
 params = [p for p in model.parameters() if p.requires_grad]
 optim = torch.optim.SGD(params, lr=0.005, momentum=0.9, weight_decay=0.0005)
+lr_scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=5, gamma=0.1)
 
+
+try:
+    os.mkdir('models')
+except:
+    pass
+
+now = datetime.datetime.now()
+try:
+    os.mkdir('models/{}-{}-{}_{}-{}'.format(now.month, now.day, now.year, now.hour, now.minute))
+except:
+    pass
+
+
+best_loss = 10e10
 for epoch in range(epochs):
     # train a single epoch
     print('Epoch {}'.format(epoch+1))
@@ -93,15 +110,6 @@ for epoch in range(epochs):
 
     print('Training loss: {}, Testing loss: {}'.format(train_loss, test_loss))
 
-try:
-    os.mkdir('models')
-except:
-    pass
-
-now = datetime.datetime.now()
-try:
-    os.mkdir('models/{}-{}-{}_{}-{}'.format(now.month, now.day, now.year, now.hour, now.minute))
-except:
-    pass
-
-torch.save(model.state_dict(), 'models/{}-{}-{}_{}-{}/fasterrcnn'.format(now.month, now.day, now.year, now.hour, now.minute))
+    if(test_loss < best_loss):
+        torch.save(model.state_dict(), 'models/{}-{}-{}_{}-{}/{}'.format(now.month, now.day, now.year, now.hour, now.minute, model_type))
+        best_loss = test_loss

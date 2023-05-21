@@ -28,13 +28,16 @@ class PennFudanPed(Dataset):
             mask = self.transforms(mask)
 
         mask = np.array(mask)
+        if(len(mask.shape) > 2):
+            mask = np.squeeze(mask)
+
         obj_ids = np.unique(mask)
         obj_ids = obj_ids[1:]
 
         boxes = []
         masks = []
         for obj in obj_ids:
-            obj_mask = np.where(mask == obj, 1, 0)
+            obj_mask = np.where(mask == obj, True, False)
             masks.append(obj_mask)
             pos = np.nonzero(obj_mask)
             if(len(obj_mask.shape) > 2):
@@ -48,7 +51,6 @@ class PennFudanPed(Dataset):
                 ymin = np.min(pos[0])
                 ymax = np.max(pos[0])
             boxes.append([xmin, ymin, xmax, ymax])
-            # print(idx, boxes[-1])
 
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
         labels = torch.ones(len(obj_ids), dtype=torch.int64)
@@ -69,5 +71,7 @@ class PennFudanPed(Dataset):
 
 if __name__=='__main__':
     data = PennFudanPed('PennFudanPed', None)
-    for i in range(data.__len__()):
-        data.__getitem__(i)
+    _, target = data[0]
+    print(target['masks'].size())
+    # for i in range(data.__len__()):
+    #     data.__getitem__(i)
