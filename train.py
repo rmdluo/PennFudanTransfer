@@ -5,6 +5,7 @@ import datetime
 import os
 
 import torch
+import numpy as np
 from torchvision import transforms
 from torchsummary import summary
 from torch.utils.data import DataLoader
@@ -62,7 +63,7 @@ def test_inference():
 params = [p for p in model.parameters() if p.requires_grad]
 optim = torch.optim.SGD(params, lr=0.005, momentum=0.9, weight_decay=0.0005)
 lr_scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=3, gamma=0.1)
-
+stopping_point = 3
 
 try:
     os.mkdir('models')
@@ -77,6 +78,7 @@ except:
 
 
 best_loss = 10e10
+past_losses = []
 for epoch in range(epochs):
     # train a single epoch
     print('Epoch {}'.format(epoch+1))
@@ -116,3 +118,10 @@ for epoch in range(epochs):
     if(test_loss < best_loss):
         torch.save(model.state_dict(), 'models/{}-{}-{}_{}-{}/{}'.format(now.month, now.day, now.year, now.hour, now.minute, model_type))
         best_loss = test_loss
+
+    # stop early if loss does not improve for stopping_point epochs
+    if(epoch > stopping_point - 1 and np.all(np.array(past_losses >= best_loss))):
+        break
+    elif(epoch > stopping_point - 1):
+        past_losses.pop(0)    
+    past_losses.append(test_loss)
