@@ -58,7 +58,7 @@ def test_inference():
 # optimizer
 params = [p for p in model.parameters() if p.requires_grad]
 optim = torch.optim.SGD(params, lr=0.005, momentum=0.9, weight_decay=0.0005)
-lr_scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=5, gamma=0.1)
+lr_scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=3, gamma=0.1)
 
 
 try:

@@ -5,7 +5,7 @@ from data import PennFudanPed
 from torchvision import transforms
 import torch
 
-model_path = 'C:/Users/moomo/Documents/AAA Actual Stuff/Programming/Semantic Segmentation Test/models/5-21-2023_16-35/maskrcnn'
+model_path = 'C:/Users/moomo/Documents/AAA Actual Stuff/Programming/Semantic Segmentation Test/models/5-21-2023_16-54/maskrcnn'
 
 model = get_maskrcnn(2)
 model.load_state_dict(torch.load(model_path))
