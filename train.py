@@ -13,7 +13,10 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # load model with frozen backbone
 model_type = "maskrcnn"
-model = get_maskrcnn(2, weights='DEFAULT', freeze_backbone=True)
+if model_type == "maskrcnn":
+    model = get_maskrcnn(2, weights='DEFAULT', freeze_backbone=True)
+else:
+    model = get_fasterrcnn(2, weights='DEFAULT', freeze_backbone=True)
 model.to(device)
 ## summary(model)
 
