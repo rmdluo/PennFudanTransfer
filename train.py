@@ -79,9 +79,9 @@ except:
 
 best_loss = 10e10
 past_losses = []
-for epoch in range(epochs):
+for epoch in range(1, epochs + 1):
     # train a single epoch
-    print('Epoch {}'.format(epoch+1))
+    print('Epoch {}'.format(epoch))
     model.train()
     running_loss = 0
     num_batches = 0
@@ -120,8 +120,10 @@ for epoch in range(epochs):
         best_loss = test_loss
 
     # stop early if loss does not improve for stopping_point epochs
-    if(epoch > stopping_point - 1 and np.all(np.array(past_losses >= best_loss))):
-        break
-    elif(epoch > stopping_point - 1):
-        past_losses.pop(0)    
     past_losses.append(test_loss)
+    if(epoch > stopping_point and np.all(np.array(past_losses) > best_loss)):
+        break
+    elif(epoch > stopping_point):
+        past_losses.pop(0)
+    print(len(past_losses))
+    
