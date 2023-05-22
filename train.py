@@ -121,7 +121,7 @@ for epoch in range(1, epochs + 1):
 
     # stop early if loss does not improve for stopping_point epochs
     past_losses.append(test_loss)
-    if(epoch > stopping_point and np.all(np.array(past_losses) > best_loss)):
-        break
-    elif(epoch > stopping_point):
-        past_losses.pop(0)    
+    if(epoch > stopping_point):
+        past_losses.pop(0) 
+        if(np.all(np.array(past_losses) > best_loss)):
+            break           
